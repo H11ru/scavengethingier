@@ -201,6 +201,10 @@ def load_chunks_near_player():
                 pass
             del loaded_chunks[key]
 
+ # --- Inventory system ---
+inventory = {tid: 0 for tid in TRASH_TYPE_BY_ID}
+pending_inventory = []
+
 # Main loop
 gravity = 1
 camera = type('Camera', (), {'x': 0, 'y': 0})()
@@ -373,6 +377,27 @@ while run:
                     pending_inventory.append(tid)
                     del chunk[i]
                     break
+
+    # --- Inventory collection ---
+    if pending_inventory:
+        for tid in pending_inventory:
+            if tid in inventory:
+                inventory[tid] += 1
+            else:
+                inventory[tid] = 1
+        pending_inventory.clear()
+
+    # Inventory display
+    inv_x = 10
+    inv_y = 40
+    for tid, count in inventory.items():
+        trash_type = get_trash_type(tid)
+        name = trash_type["name"]
+        color = trash_type["color"]
+        inv_text = font.render(f"{name}: {count}", True, color)
+        screen.blit(inv_text, (inv_x, inv_y))
+        inv_y += 22
+
     # FPS
     fps_text = font.render(f"FPS: {int(clock.get_fps())}", True, (255, 255, 255))
     screen.blit(fps_text, (10, 10)) 
